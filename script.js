@@ -5,8 +5,8 @@ const SITE_TITLE = "Oficina de Audiovisuales";
 
 const REPORTE_CONFIG = {
   correoJefe: "jefe@correo.com",           // destinatario del correo
-  telefonoWhatsapp: "573000000000",        // con código de país, sin "+", sin espacios
-  nombreResponsable: "Tu nombre"
+  telefonoWhatsapp: "573156422898",        // con código de país, sin "+", sin espacios
+  nombreResponsable: "Aux Audiovisuales"
 };
 
 /* ================================================================
@@ -24,13 +24,15 @@ const REPORTE_CONFIG = {
    valores — no necesitas tocar el resto del código.
 ================================================================= */
 const CATEGORIAS = [
-  { id: "portatiles",     nombre: "Portátiles",         total: 0 },
-  { id: "pc_mesa",        nombre: "PC de Mesa",         total: 0 },
-  { id: "videobeam",      nombre: "Videobeams",         total: 0 },
-  { id: "mouse",          nombre: "Mouse",              total: 0 },
-  { id: "teclado",        nombre: "Teclados",           total: 0 },
-  { id: "convertidores",  nombre: "Convertidores",      total: 0 }
-
+  { id: "Portatiles",     nombre: "Portátiles",         total: 0 },
+  { id: "Bafles",         nombre: "Bafles",             total: 0 },
+  { id: "Videobeam",      nombre: "Videobeams",         total: 0 },
+  { id: "Mouse",          nombre: "Mouse",              total: 0 },
+  { id: "Teclado",        nombre: "Teclados",           total: 0 },
+  { id: "Convertidores",  nombre: "Convertidores",      total: 0 },
+  { id: "Microfonos",     nombre: "Microfonos",         total: 0 },
+  { id: "WebCam",         nombre: "WebCam",             total: 0 },
+  { id: "Otro",           nombre: "Otro",               total: 0 }
   // Agrega aquí nuevas categorías, por ejemplo:
   // , { id: "camaras", nombre: "Cámaras", total: 0 }
   // , { id: "parlantes", nombre: "Parlantes", total: 0 }
