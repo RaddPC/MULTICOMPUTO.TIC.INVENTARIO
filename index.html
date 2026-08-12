@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Préstamos — Oficina de Audiovisuales</title>
+<meta name="description" content="Registro y control de préstamos de equipos audiovisuales, con descuento automático de inventario.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark">AV</div>
+      <div>
+        <h1 id="siteTitle">Oficina de Audiovisuales</h1>
+        <p>Registro de préstamos de equipos</p>
+      </div>
+    </div>
+    <div class="updated">
+      Préstamos activos<br>
+      <b id="activeCount">0</b>
+    </div>
+  </header>
+
+  <section class="stats" id="statsBar">
+    <div class="stat"><div class="n" id="statTotal">0</div><div class="l">Equipos totales</div></div>
+    <div class="stat open"><div class="n" id="statDisponible">0</div><div class="l">Disponibles</div></div>
+    <div class="stat closed"><div class="n" id="statPrestado">0</div><div class="l">Prestados</div></div>
+    <div class="stat"><div class="n" id="statCategorias">0</div><div class="l">Categorías</div></div>
+  </section>
+
+  <div class="report-bar">
+    <button id="btnNuevoPrestamo" class="report-btn primary-btn">➕ Registrar nuevo préstamo</button>
+    <button id="btnReporte" class="report-btn galileo-btn">📄 Generar reporte</button>
+  </div>
+
+  <div class="controls">
+    <div>
+      <label for="fCategoria">Categoría</label>
+      <select id="fCategoria"><option value="">Todas</option></select>
+    </div>
+    <div>
+      <label for="fSearch">Buscar solicitante</label>
+      <input type="text" id="fSearch" placeholder="Nombre…">
+    </div>
+    <div class="status-toggle" role="group" aria-label="Filtrar por estado de préstamo">
+      <button data-status="prestado" class="active">Activos</button>
+      <button data-status="devuelto">Devueltos</button>
+      <button data-status="">Todos</button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="item"><span class="dot open"></span> Disponible completo</span>
+    <span class="item"><span class="dot amber"></span> Parcialmente prestado</span>
+    <span class="item"><span class="dot closed"></span> Agotado</span>
+  </div>
+
+  <main>
+
+    <section class="cat-section">
+      <div class="floor-label">Inventario por categoría</div>
+      <div class="cat-grid" id="catGrid"></div>
+    </section>
+
+    <section class="loans-section">
+      <div class="floor-label" id="loansSectionLabel">Préstamos</div>
+      <div id="loansList"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    Inventario y categorías editables en <code>CATEGORIAS</code> dentro de <code>script.js</code> · Préstamos guardados en este navegador
+  </footer>
+
+</div>
+
+<!-- Modal: registrar préstamo -->
+<div class="modal-overlay" id="loanOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Registrar nuevo préstamo</h3>
+      <button class="modal-close" id="loanClose">✕ CERRAR</button>
+    </div>
+    <div class="modal-body">
+      <form id="loanForm" class="form-grid">
+        <div class="field">
+          <label for="inCategoria">Equipo</label>
+          <select id="inCategoria" required></select>
+          <span class="hint" id="hintDisponible"></span>
+        </div>
+        <div class="field">
+          <label for="inCantidad">Cantidad</label>
+          <input type="number" id="inCantidad" min="1" value="1" required>
+        </div>
+        <div class="field full">
+          <label for="inSolicitante">Solicitante</label>
+          <input type="text" id="inSolicitante" placeholder="Nombre completo" required>
+        </div>
+        <div class="field full">
+          <label for="inDependencia">Dependencia / curso</label>
+          <input type="text" id="inDependencia" placeholder="Ej: Facultad de Ingeniería, grupo 3A">
+        </div>
+        <div class="field">
+          <label for="inFechaPrestamo">Fecha de préstamo</label>
+          <input type="date" id="inFechaPrestamo" required>
+        </div>
+        <div class="field">
+          <label for="inFechaDevolucion">Devolución estimada</label>
+          <input type="date" id="inFechaDevolucion">
+        </div>
+        <div class="field full">
+          <label for="inObservaciones">Observaciones</label>
+          <textarea id="inObservaciones" rows="2" placeholder="Opcional"></textarea>
+        </div>
+      </form>
+      <p class="modal-note error" id="loanError"></p>
+    </div>
+    <div class="modal-actions">
+      <button type="submit" form="loanForm" class="primary">Guardar préstamo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: reporte -->
+<div class="modal-overlay" id="reportOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Reporte de préstamos</h3>
+      <button class="modal-close" id="reportClose">✕ CERRAR</button>
+    </div>
+    <div class="modal-body">
+      <textarea id="reportText" readonly></textarea>
+    </div>
+    <div class="modal-actions">
+      <button id="btnDescargarPDF" class="primary">📄 1. Descargar PDF</button>
+      <a id="btnWhatsapp" href="#" target="_blank" rel="noopener">💬 2. Abrir chat de WhatsApp</a>
+      <button id="btnCopiar">📋 Copiar texto</button>
+      <button id="btnDescargar">⬇️ Descargar .txt</button>
+      <a id="btnMailto" href="#">✉️ Enviar por correo</a>
+    </div>
+    <p class="modal-note">
+      <b>Para WhatsApp:</b> primero descarga el PDF (botón 1), luego abre el chat (botón 2) y adjunta el archivo descargado.
+    </p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
