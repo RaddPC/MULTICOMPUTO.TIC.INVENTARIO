@@ -32,6 +32,7 @@ const CATEGORIAS = [
   { id: "Convertidores",  nombre: "Convertidores",      total: 100 },
   { id: "Microfonos",     nombre: "Microfonos",         total: 100 },
   { id: "WebCam",         nombre: "WebCam",             total: 100 },
+  { id: "Cables",         nombre: "Cables",             total: 100 },
   { id: "Otro",           nombre: "Otro",               total: 100 }
   // Agrega aquí nuevas categorías, por ejemplo:
   // , { id: "camaras", nombre: "Cámaras", total: 0 }
