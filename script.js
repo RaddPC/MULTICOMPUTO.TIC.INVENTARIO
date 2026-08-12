@@ -24,15 +24,15 @@ const REPORTE_CONFIG = {
    valores — no necesitas tocar el resto del código.
 ================================================================= */
 const CATEGORIAS = [
-  { id: "Portatiles",     nombre: "Portátiles",         total: 0 },
-  { id: "Bafles",         nombre: "Bafles",             total: 0 },
-  { id: "Videobeam",      nombre: "Videobeams",         total: 0 },
-  { id: "Mouse",          nombre: "Mouse",              total: 0 },
-  { id: "Teclado",        nombre: "Teclados",           total: 0 },
-  { id: "Convertidores",  nombre: "Convertidores",      total: 0 },
-  { id: "Microfonos",     nombre: "Microfonos",         total: 0 },
-  { id: "WebCam",         nombre: "WebCam",             total: 0 },
-  { id: "Otro",           nombre: "Otro",               total: 0 }
+  { id: "Portatiles",     nombre: "Portátiles",         total: 100 },
+  { id: "Bafles",         nombre: "Bafles",             total: 100 },
+  { id: "Videobeam",      nombre: "Videobeams",         total: 100 },
+  { id: "Mouse",          nombre: "Mouse",              total: 100 },
+  { id: "Teclado",        nombre: "Teclados",           total: 100 },
+  { id: "Convertidores",  nombre: "Convertidores",      total: 100 },
+  { id: "Microfonos",     nombre: "Microfonos",         total: 100 },
+  { id: "WebCam",         nombre: "WebCam",             total: 100 },
+  { id: "Otro",           nombre: "Otro",               total: 100 }
   // Agrega aquí nuevas categorías, por ejemplo:
   // , { id: "camaras", nombre: "Cámaras", total: 0 }
   // , { id: "parlantes", nombre: "Parlantes", total: 0 }
