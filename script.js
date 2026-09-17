@@ -442,16 +442,152 @@ $("btnDescargar").addEventListener("click", () => {
   a.download = `inventario_${new Date().toISOString().slice(0,10)}.txt`;
   a.click();
 });
+/* Paleta del proyecto en RGB, para que el PDF combine con la página */
+const PDF_COLOR = {
+  inkDark:  [10, 31, 48],     // --blue-deep
+  ink:      [14, 42, 63],     // --blue-ink
+  line:     [30, 74, 99],     // --blue-line
+  paper:    [234, 242, 244],  // --paper
+  paperDim: [169, 195, 204],  // --paper-dim
+  cyan:     [127, 216, 224],  // --cyan
+  open:     [78, 155, 114],   // --open
+  openBg:   [225, 238, 231],
+  closed:   [181, 73, 63],    // --closed
+  closedBg: [242, 224, 222],
+  amber:    [217, 166, 62],   // --amber
+  amberBg:  [247, 236, 216],
+  white:    [255, 255, 255]
+};
+
+function pdfEncabezado(doc, pageW){
+  doc.setFillColor(...PDF_COLOR.inkDark);
+  doc.rect(0, 0, pageW, 72, "F");
+
+  doc.setDrawColor(...PDF_COLOR.cyan);
+  doc.setLineWidth(1.2);
+  doc.circle(38, 36, 15, "S");
+  doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+  doc.setTextColor(...PDF_COLOR.cyan);
+  doc.text("UDES", 38, 39, { align: "center" });
+
+  doc.setFont("helvetica", "bold"); doc.setFontSize(15);
+  doc.setTextColor(...PDF_COLOR.white);
+  doc.text(SITE_TITLE, 64, 32);
+
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+  doc.setTextColor(...PDF_COLOR.paperDim);
+  doc.text("REPORTE DE INVENTARIO", 64, 47);
+
+  doc.setFontSize(8);
+  doc.text(fechaHoraActual(), pageW - 40, 30, { align: "right" });
+  doc.text("Responsable: " + REPORTE_CONFIG.nombreResponsable, pageW - 40, 42, { align: "right" });
+}
+
+function pdfPieDePagina(doc, pageW, pageH){
+  const total = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= total; i++){
+    doc.setPage(i);
+    doc.setDrawColor(...PDF_COLOR.line);
+    doc.setLineWidth(0.6);
+    doc.line(40, pageH - 34, pageW - 40, pageH - 34);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5);
+    doc.setTextColor(...PDF_COLOR.line);
+    doc.text(SITE_TITLE + " · Inventario de equipos", 40, pageH - 22);
+    doc.text(`Página ${i} de ${total}`, pageW - 40, pageH - 22, { align: "right" });
+  }
+}
+
+function pdfTarjetaResumen(doc, x, y, w, h, valor, etiqueta, color, colorBg){
+  doc.setFillColor(...colorBg);
+  doc.roundedRect(x, y, w, h, 3, 3, "F");
+  doc.setDrawColor(...color);
+  doc.setLineWidth(0.8);
+  doc.roundedRect(x, y, w, h, 3, 3, "S");
+
+  doc.setFont("helvetica", "bold"); doc.setFontSize(16);
+  doc.setTextColor(...color);
+  doc.text(String(valor), x + w / 2, y + h / 2 - 2, { align: "center" });
+
+  doc.setFont("helvetica", "normal"); doc.setFontSize(7.5);
+  doc.setTextColor(...PDF_COLOR.ink);
+  doc.text(etiqueta.toUpperCase(), x + w / 2, y + h - 8, { align: "center" });
+}
+
 $("btnDescargarPDF").addEventListener("click", () => {
   if (!window.jspdf){ alert("No se pudo cargar el generador de PDF."); return; }
   const doc = new window.jspdf.jsPDF({ unit: "pt", format: "letter" });
-  doc.setFont("courier", "normal"); doc.setFontSize(9);
-  const lineas = doc.splitTextToSize($("reportText").value, 520);
-  let y = 50;
-  lineas.forEach(l => {
-    if (y > 740){ doc.addPage(); y = 50; }
-    doc.text(l, 40, y); y += 12;
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 40;
+
+  const total    = equipos.reduce((s,e) => s + totalDe(e), 0);
+  const bodega   = equipos.reduce((s,e) => s + num(e.bodega), 0);
+  const prestamo = equipos.reduce((s,e) => s + num(e.prestamo), 0);
+  const danado   = equipos.reduce((s,e) => s + num(e.danado), 0);
+
+  pdfEncabezado(doc, pageW);
+
+  let y = 90;
+  const gap = 10;
+  const cardW = (pageW - margin * 2 - gap * 3) / 4;
+  const cardH = 50;
+  pdfTarjetaResumen(doc, margin,                      y, cardW, cardH, total,    "Total",    PDF_COLOR.ink,    PDF_COLOR.paper);
+  pdfTarjetaResumen(doc, margin + (cardW+gap)*1,       y, cardW, cardH, bodega,   "Bodega",   PDF_COLOR.open,   PDF_COLOR.openBg);
+  pdfTarjetaResumen(doc, margin + (cardW+gap)*2,       y, cardW, cardH, prestamo, "Préstamo", PDF_COLOR.amber,  PDF_COLOR.amberBg);
+  pdfTarjetaResumen(doc, margin + (cardW+gap)*3,       y, cardW, cardH, danado,   "Dañado",   PDF_COLOR.closed, PDF_COLOR.closedBg);
+  y += cardH + 22;
+
+  doc.setFont("helvetica", "bold"); doc.setFontSize(10);
+  doc.setTextColor(...PDF_COLOR.ink);
+  doc.text("INVENTARIO POR CATEGORÍA", margin, y);
+  y += 8;
+
+  const filasCategoria = listaCategorias()
+    .map(c => ({ c, d: porCategoria(c) }))
+    .filter(x => x.d.total > 0)
+    .map(x => [x.c, x.d.total, x.d.bodega, x.d.prestamo, x.d.danado]);
+
+  doc.autoTable({
+    startY: y + 4,
+    margin: { left: margin, right: margin },
+    head: [["Categoría", "Total", "Bodega", "Préstamo", "Dañado"]],
+    body: filasCategoria,
+    theme: "grid",
+    styles: { font: "helvetica", fontSize: 8.5, cellPadding: 5, lineColor: PDF_COLOR.line, lineWidth: 0.4 },
+    headStyles: { fillColor: PDF_COLOR.ink, textColor: PDF_COLOR.white, fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [245, 248, 249] },
+    columnStyles: { 1:{halign:"right"}, 2:{halign:"right"}, 3:{halign:"right"}, 4:{halign:"right"} }
   });
+
+  let y2 = doc.lastAutoTable.finalY + 26;
+  if (y2 > pageH - 120){ doc.addPage(); y2 = 60; }
+  doc.setFont("helvetica", "bold"); doc.setFontSize(10);
+  doc.setTextColor(...PDF_COLOR.ink);
+  doc.text("DETALLE DE EQUIPOS", margin, y2);
+
+  const detalle = filtrar().map(e => [
+    e.sede, e.id, e.categoria, e.nombre,
+    num(e.bodega), num(e.prestamo), num(e.danado), totalDe(e)
+  ]);
+
+  doc.autoTable({
+    startY: y2 + 10,
+    margin: { left: margin, right: margin, bottom: 50 },
+    head: [["Sede", "ID", "Categoría", "Nombre", "Bodega", "Préstamo", "Dañado", "Total"]],
+    body: detalle,
+    theme: "grid",
+    styles: { font: "helvetica", fontSize: 8, cellPadding: 4.5, lineColor: PDF_COLOR.line, lineWidth: 0.3 },
+    headStyles: { fillColor: PDF_COLOR.line, textColor: PDF_COLOR.white, fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [245, 248, 249] },
+    columnStyles: { 4:{halign:"right"}, 5:{halign:"right"}, 6:{halign:"right"}, 7:{halign:"right", fontStyle:"bold"} },
+    didParseCell: (data) => {
+      if (data.section === "body" && data.column.index === 7){
+        data.cell.styles.textColor = PDF_COLOR.ink;
+      }
+    }
+  });
+
+  pdfPieDePagina(doc, pageW, pageH);
   doc.save(`inventario_${new Date().toISOString().slice(0,10)}.pdf`);
 });
 
