@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Préstamos — Oficina de Audiovisuales</title>
-<meta name="description" content="Registro y control de préstamos de equipos audiovisuales, con descuento automático de inventario.">
+<title>Inventario — Oficina de Audiovisuales</title>
+<meta name="description" content="Inventario de equipos audiovisuales por sede y categoría, sincronizado con Google Sheets vía SheetDB.">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,47 +16,54 @@
       <div class="brand-mark">UDES</div>
       <div>
         <h1 id="siteTitle">Oficina de Audiovisuales</h1>
-        <p>Registro de préstamos de equipos</p>
+        <p>Inventario de equipos</p>
       </div>
     </div>
     <div class="updated">
-      Préstamos activos<br>
-      <b id="activeCount">0</b>
+      Estado de conexión<br>
+      <b id="syncState">—</b>
     </div>
   </header>
 
   <section class="stats" id="statsBar">
     <div class="stat"><div class="n" id="statTotal">0</div><div class="l">Equipos totales</div></div>
-    <div class="stat open"><div class="n" id="statDisponible">0</div><div class="l">Disponibles</div></div>
-    <div class="stat closed"><div class="n" id="statPrestado">0</div><div class="l">Prestados</div></div>
+    <div class="stat open"><div class="n" id="statBodega">0</div><div class="l">En bodega</div></div>
+    <div class="stat"><div class="n" id="statPrestamo">0</div><div class="l">En préstamo</div></div>
+    <div class="stat closed"><div class="n" id="statDanado">0</div><div class="l">Dañados</div></div>
     <div class="stat"><div class="n" id="statCategorias">0</div><div class="l">Categorías</div></div>
   </section>
 
   <div class="report-bar">
-    <button id="btnNuevoPrestamo" class="report-btn primary-btn">➕ Registrar nuevo préstamo</button>
+    <button id="btnNuevo" class="report-btn primary-btn">➕ Ingresar equipo a bodega</button>
+    <button id="btnRecargar" class="report-btn">🔄 Recargar desde la hoja</button>
     <button id="btnReporte" class="report-btn galileo-btn">📄 Generar reporte</button>
   </div>
 
   <div class="controls">
     <div>
+      <label for="fSede">Sede</label>
+      <select id="fSede"><option value="">Todas</option></select>
+    </div>
+    <div>
       <label for="fCategoria">Categoría</label>
       <select id="fCategoria"><option value="">Todas</option></select>
     </div>
     <div>
-      <label for="fSearch">Buscar solicitante</label>
-      <input type="text" id="fSearch" placeholder="Nombre…">
+      <label for="fSearch">Buscar (id o nombre)</label>
+      <input type="text" id="fSearch" placeholder="Ej: PC-014, Epson…">
     </div>
-    <div class="status-toggle" role="group" aria-label="Filtrar por estado de préstamo">
-      <button data-status="prestado" class="active">Activos</button>
-      <button data-status="devuelto">Devueltos</button>
-      <button data-status="">Todos</button>
+    <div class="status-toggle" role="group" aria-label="Filtrar por estado del equipo">
+      <button data-status="" class="active">Todos</button>
+      <button data-status="bodega">En bodega</button>
+      <button data-status="prestamo">Prestados</button>
+      <button data-status="danado">Dañados</button>
     </div>
   </div>
 
   <div class="legend">
-    <span class="item"><span class="dot open"></span> Disponible completo</span>
+    <span class="item"><span class="dot open"></span> Todo en bodega</span>
     <span class="item"><span class="dot amber"></span> Parcialmente prestado</span>
-    <span class="item"><span class="dot closed"></span> Agotado</span>
+    <span class="item"><span class="dot closed"></span> Sin unidades en bodega</span>
   </div>
 
   <main>
@@ -67,14 +74,14 @@
     </section>
 
     <section class="loans-section">
-      <div class="floor-label" id="loansSectionLabel">Préstamos</div>
-      <div id="loansList"></div>
+      <div class="floor-label" id="listLabel">Equipos</div>
+      <div id="itemsList"></div>
     </section>
 
   </main>
 
   <footer>
-    Inventario y categorías editables en <code>CATEGORIAS</code> dentro de <code>script.js</code> · Préstamos guardados en este navegador
+    Datos en <code>SHEETDB_URL</code> · Inventario local editable en <code>INVENTARIO</code> dentro de <code>script.js</code>
   </footer>
 <footer>
     Codigo y Diseño · Auxiliar Logistico - Juan Tobon
@@ -82,49 +89,56 @@
 
 </div>
 
-<!-- Modal: registrar préstamo -->
-<div class="modal-overlay" id="loanOverlay">
+<!-- Modal: ingresar / editar equipo -->
+<div class="modal-overlay" id="itemOverlay">
   <div class="modal-box">
     <div class="modal-head">
-      <h3>Registrar nuevo préstamo</h3>
-      <button class="modal-close" id="loanClose">✕ CERRAR</button>
+      <h3 id="itemModalTitle">Ingresar equipo a bodega</h3>
+      <button class="modal-close" id="itemClose">✕ CERRAR</button>
     </div>
     <div class="modal-body">
-      <form id="loanForm" class="form-grid">
+      <form id="itemForm" class="form-grid">
         <div class="field">
-          <label for="inCategoria">Equipo</label>
-          <select id="inCategoria" required></select>
-          <span class="hint" id="hintDisponible"></span>
-        </div>
-        <div class="field">
-          <label for="inCantidad">Cantidad</label>
-          <input type="number" id="inCantidad" min="1" value="1" required>
-        </div>
-        <div class="field full">
-          <label for="inSolicitante">Solicitante</label>
-          <input type="text" id="inSolicitante" placeholder="Nombre completo" required>
-        </div>
-        <div class="field full">
-          <label for="inDependencia">Dependencia / curso</label>
-          <input type="text" id="inDependencia" placeholder="Ej: Facultad de Ingeniería, grupo 3A">
+          <label for="inSede">Sede</label>
+          <input type="text" id="inSede" list="sedesList" placeholder="Ej: Bucaramanga" required>
+          <datalist id="sedesList"></datalist>
         </div>
         <div class="field">
-          <label for="inFechaPrestamo">Fecha de préstamo</label>
-          <input type="date" id="inFechaPrestamo" required>
+          <label for="inId">ID</label>
+          <input type="text" id="inId" placeholder="Ej: PC-014" required>
+          <span class="hint" id="hintId"></span>
         </div>
         <div class="field">
-          <label for="inFechaDevolucion">Devolución estimada</label>
-          <input type="date" id="inFechaDevolucion">
+          <label for="inCategoria">Categoría</label>
+          <input type="text" id="inCategoria" list="catList" placeholder="Ej: Portátiles" required>
+          <datalist id="catList"></datalist>
         </div>
-        <div class="field full">
-          <label for="inObservaciones">Observaciones</label>
-          <textarea id="inObservaciones" rows="2" placeholder="Opcional"></textarea>
+        <div class="field">
+          <label for="inNombre">Nombre</label>
+          <input type="text" id="inNombre" placeholder="Ej: Lenovo ThinkPad E14" required>
+        </div>
+        <div class="field">
+          <label for="inBodega">Bodega</label>
+          <input type="number" id="inBodega" min="0" value="1" required>
+        </div>
+        <div class="field">
+          <label for="inPrestamo">Préstamo</label>
+          <input type="number" id="inPrestamo" min="0" value="0" required>
+        </div>
+        <div class="field">
+          <label for="inDanado">Dañado</label>
+          <input type="number" id="inDanado" min="0" value="0" required>
+        </div>
+        <div class="field">
+          <label for="inTotal">Total (automático)</label>
+          <input type="number" id="inTotal" value="1" readonly>
+          <span class="hint">Bodega + Préstamo + Dañado</span>
         </div>
       </form>
-      <p class="modal-note error" id="loanError"></p>
+      <p class="modal-note error" id="itemError"></p>
     </div>
     <div class="modal-actions">
-      <button type="submit" form="loanForm" class="primary">Guardar préstamo</button>
+      <button type="submit" form="itemForm" class="primary">Guardar equipo</button>
     </div>
   </div>
 </div>
@@ -133,7 +147,7 @@
 <div class="modal-overlay" id="reportOverlay">
   <div class="modal-box">
     <div class="modal-head">
-      <h3>Reporte de préstamos</h3>
+      <h3>Reporte de inventario</h3>
       <button class="modal-close" id="reportClose">✕ CERRAR</button>
     </div>
     <div class="modal-body">
