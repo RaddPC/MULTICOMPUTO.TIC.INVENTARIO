@@ -1,7 +1,7 @@
 /* ================================================================
    CONFIGURACIÓN GENERAL — EDITA AQUÍ
 ================================================================= */
-const SITE_TITLE = "TIC - MULTICOMPUTO";
+const SITE_TITLE = "MULTICOMPUTO - MULTITECH";
 
 /* Tu endpoint de SheetDB. Ejemplo: "https://sheetdb.io/api/v1/abc123xyz"
    Si lo dejas vacío, la página funciona solo con el arreglo INVENTARIO de abajo. */
