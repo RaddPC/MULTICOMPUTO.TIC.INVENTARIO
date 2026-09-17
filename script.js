@@ -5,7 +5,7 @@ const SITE_TITLE = "Oficina de Audiovisuales";
 
 /* Tu endpoint de SheetDB. Ejemplo: "https://sheetdb.io/api/v1/abc123xyz"
    Si lo dejas vacío, la página funciona solo con el arreglo INVENTARIO de abajo. */
-const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI";
+const SHEETDB_URL = "https://docs.google.com/spreadsheets/d/1sseAKQaYVrrMr0Ta_AGvMs_YmtEZt-5ARnfEwu2IksE/edit?gid=0#gid=0";
 
 /* Si tu hoja tiene varias pestañas, escribe el nombre de la pestaña. Si no, deja "". */
 const SHEETDB_HOJA = "";
