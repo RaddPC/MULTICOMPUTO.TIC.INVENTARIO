@@ -21,7 +21,7 @@ const COL_DANADO = "dañado";
 const REPORTE_CONFIG = {
   correoJefe: "juangt1022@gmail.com",
   telefonoWhatsapp: "573015122607",
-  nombreResponsable: "TIC - Juan Tobon"
+  nombreResponsable: "TIC - Juan Gonzalo C.Tobon"
 };
 
 /* Sedes y categorías que aparecen en los filtros y en el formulario.
@@ -468,7 +468,7 @@ function pdfEncabezado(doc, pageW){
   doc.circle(38, 36, 15, "S");
   doc.setFont("helvetica", "bold"); doc.setFontSize(8);
   doc.setTextColor(...PDF_COLOR.cyan);
-  doc.text("UDES", 38, 39, { align: "center" });
+  doc.text("TIC", 38, 39, { align: "center" });
 
   doc.setFont("helvetica", "bold"); doc.setFontSize(15);
   doc.setTextColor(...PDF_COLOR.white);
