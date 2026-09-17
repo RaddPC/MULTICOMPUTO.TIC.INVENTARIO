@@ -505,3 +505,70 @@ document.getElementById("btnDescargarPDF").addEventListener("click", () => {
 /* ---------- Init ---------- */
 document.getElementById("siteTitle").textContent = SITE_TITLE;
 renderAll();
+
+/* ================================================================
+   CONEXIÓN CON GOOGLE SHEETS (SHEETDB)
+================================================================= */
+
+// REEMPLAZA ESTE ENLACE con la API URL que te dio la página de SheetDB
+const SHEETDB_API_URL = "https://sheetdb.io/api/v1/gfuqqm3ybkdwm"; 
+
+// Esta función toma tus categorías de JavaScript y las sincroniza en la nube
+async function sincronizarInventarioConGoogleSheets() {
+  console.log("Iniciando sincronización con Google Sheets...");
+
+  // Creamos el paquete de datos adaptado exactamente a las columnas de tu imagen
+  const filasParaEnviar = CATEGORIAS.map(c => {
+    const prestados = prestadoPorCategoria(c.id);
+    const disponibles = disponiblePorCategoria(c.id);
+
+    return {
+      sede: "Principal",            // Puedes cambiarlo si manejas sedes
+      id: c.id,                     // Id interno (ej: Portatiles)
+      categoria: c.nombre,          // Nombre visible (ej: Portátiles)
+      nombre: c.nombre,             // Copia el nombre en el campo nombre
+      bodega: disponibles,          // Lo que queda guardado disponible
+      prestamo: prestados,          // Lo que está prestado actualmente
+      dañado: 0,                    // Por ahora en 0, modificable luego
+      total: c.total                // El total configurado arriba (100)
+    };
+  });
+
+  try {
+    // Para evitar duplicar filas cada vez que guardas, primero limpiaremos la tabla de SheetDB
+    // y luego insertaremos los datos frescos actualizados.
+    const respuestaBorrar = await fetch(`${SHEETDB_API_URL}/all`, { method: 'DELETE' });
+
+    if (respuestaBorrar.ok) {
+      // Si se limpió bien, enviamos el inventario actualizado
+      const respuestaInsertar = await fetch(SHEETDB_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: filasParaEnviar })
+      });
+
+      if (respuestaInsertar.ok) {
+        console.log("¡Google Sheets actualizado con éxito!");
+      } else {
+        console.error("Error al reinsertar los datos en Google Sheets.");
+      }
+    }
+  } catch (error) {
+    console.error("Error de conexión con la base de datos de Google:", error);
+  }
+}
+
+/* ================================================================
+   INTERCEPTAR GUARDADO LOCAL PARA MANDARLO A LA NUBE
+================================================================= */
+// Buscamos tu función nativa 'savePrestamos' y la mejoramos para que también suba a internet
+const funcionOriginalGuardar = savePrestamos;
+
+savePrestamos = function() {
+  funcionOriginalGuardar(); // Sigue guardando en la computadora como siempre
+  sincronizarInventarioConGoogleSheets(); // ¡Y ahora también lo manda a Google Sheets en tiempo real!
+};
+
+// Sincroniza una vez al cargar la página por primera vez
+setTimeout(sincronizarInventarioConGoogleSheets, 2000);
+
