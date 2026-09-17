@@ -53,7 +53,7 @@ const INVENTARIO = [
 /* ================================================================
    LÓGICA — normalmente no necesitas editar debajo
 ================================================================= */
-const COLUMNAS = ["sede", "id", "categoria", "nombre", "bodega", "prestamo", "danado", "total"];
+const COLUMNAS = ["sede", "id", "categoria", "nombre", "bodega", "prestamo", "dañado", "total"];
 
 let equipos = [];
 let modoSheet = false;                 // true si los datos vienen de SheetDB
