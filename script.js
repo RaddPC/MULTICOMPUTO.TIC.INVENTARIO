@@ -1,7 +1,7 @@
 /* ================================================================
    CONFIGURACIÓN GENERAL — EDITA AQUÍ
 ================================================================= */
-const SITE_TITLE = "Oficina de Audiovisuales";
+const SITE_TITLE = "TIC - MULTICOMPUTO";
 
 /* Tu endpoint de SheetDB. Ejemplo: "https://sheetdb.io/api/v1/abc123xyz"
    Si lo dejas vacío, la página funciona solo con el arreglo INVENTARIO de abajo. */
@@ -19,18 +19,17 @@ const SHEETDB_TOKEN = "";
 const COL_DANADO = "dañado";
 
 const REPORTE_CONFIG = {
-  correoJefe: "jefe@correo.com",
-  telefonoWhatsapp: "573156422898",
-  nombreResponsable: "Aux Audiovisuales"
+  correoJefe: "juangt1022@gmail.com",
+  telefonoWhatsapp: "573015122607",
+  nombreResponsable: "TIC - Juan Tobon"
 };
 
 /* Sedes y categorías que aparecen en los filtros y en el formulario.
    Si llegan otras desde la hoja, se agregan solas. */
-const SEDES = ["Bucaramanga", "Cúcuta", "Valledupar"];
+const SEDES = ["Multicomputo", "Multitech"];
 
 const CATEGORIAS = [
-  "Portátiles", "Bafles", "Videobeams", "Mouse", "Teclados",
-  "Convertidores", "Microfonos", "WebCam", "Cables", "Otro"
+ "Otro"
 ];
 
 /* ================================================================
