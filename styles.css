@@ -442,3 +442,9 @@ footer{
   color: var(--blue-line-lt);
   letter-spacing: 0.5px;
 }
+
+
+/* ===== Añadidos para vista de inventario (mismo estilo) ===== */
+.cat-card .row.dam b{ color: var(--closed); }
+.loan-table td.num{ text-align:right; font-variant-numeric: tabular-nums; }
+.field.full-3{ grid-column: 1 / -1; }
