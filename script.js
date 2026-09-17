@@ -5,13 +5,18 @@ const SITE_TITLE = "Oficina de Audiovisuales";
 
 /* Tu endpoint de SheetDB. Ejemplo: "https://sheetdb.io/api/v1/abc123xyz"
    Si lo dejas vacío, la página funciona solo con el arreglo INVENTARIO de abajo. */
-const SHEETDB_URL = "https://sheetdb.io/api/v1/gfuqqm3ybkdwm";
+const SHEETDB_URL = "https://sheetdb.io/api/v1/TU_ID_AQUI";
 
 /* Si tu hoja tiene varias pestañas, escribe el nombre de la pestaña. Si no, deja "". */
 const SHEETDB_HOJA = "";
 
 /* Token de SheetDB solo si activaste autorización en tu cuenta. Si no, deja "". */
 const SHEETDB_TOKEN = "";
+
+/* Nombre EXACTO de la columna de dañados en tu hoja, tal como está escrito en
+   la fila 1 (con tilde o sin tilde). Si algún día cambias el encabezado a
+   "danado", cambia también este valor. */
+const COL_DANADO = "dañado";
 
 const REPORTE_CONFIG = {
   correoJefe: "jefe@correo.com",
@@ -74,15 +79,17 @@ function normaliza(fila){
     nombre:    String(fila.nombre ?? "").trim(),
     bodega:    num(fila.bodega),
     prestamo:  num(fila.prestamo),
-    danado:    num(fila.danado ?? fila["dañado"])
+    danado:    num(fila[COL_DANADO] ?? fila["dañado"] ?? fila.danado)
   };
 }
 
 function aFilaHoja(e){
-  return {
+  const fila = {
     sede: e.sede, id: e.id, categoria: e.categoria, nombre: e.nombre,
-    bodega: e.bodega, prestamo: e.prestamo, danado: e.danado, total: totalDe(e)
+    bodega: e.bodega, prestamo: e.prestamo, total: totalDe(e)
   };
+  fila[COL_DANADO] = e.danado;   // usa el encabezado real de la hoja ("dañado")
+  return fila;
 }
 
 /* ---------------- SheetDB ---------------- */
