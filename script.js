@@ -1,7 +1,7 @@
 /* ================================================================
    CONFIGURACIÓN GENERAL — EDITA AQUÍ
 ================================================================= */
-const SITE_TITLE = "MULTICOMPUTO - MULTITECH";
+const SITE_TITLE = "Multicomputo - Multitech";
 
 /* Tu endpoint de SheetDB. Ejemplo: "https://sheetdb.io/api/v1/abc123xyz"
    Si lo dejas vacío, la página funciona solo con el arreglo INVENTARIO de abajo. */
@@ -26,7 +26,7 @@ const REPORTE_CONFIG = {
 
 /* Sedes y categorías que aparecen en los filtros y en el formulario.
    Si llegan otras desde la hoja, se agregan solas. */
-const SEDES = ["Multicomputo", "Multitech"];
+const SEDES = ["otro"];
 
 const CATEGORIAS = [
  "Otro"
